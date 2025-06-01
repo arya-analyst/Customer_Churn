@@ -48,9 +48,42 @@ df['TotalCharges'] = df['TotalCharges'].replace(" ", "0.0")
 df['TotalCharges'] = df['TotalCharges'].astype(float)
 ```
 
+#### 
+``` python
+# checking the class distribution of the target class
+# we can check that the data isn't balanced here and we need to upsample the data to give the model enough room to learn
 
+df['Churn'].value_counts()
+```
 
+#### Dropping unnecessary columns
+```python
+df.drop(columns = ['numAdminTickets', 'numTechTickets'], inplace = True)
+```
 
+###  Exploratory Data Analysis
+
+``` python
+def plot_histogram(df, column_name):
+    plt.figure(figsize = (5, 5))
+    sns.histplot(df[column_name], kde = True)
+    plt.title(f"Distribution of {column_name}")
+
+    # calculating the mean and median values for the columns
+    col_mean = df[column_name].mean()
+    col_median = df[column_name].median()
+
+    # adding vertical lines for mean and median
+    plt.axvline(col_mean, color = 'red', linestyle = "--", label = 'Mean')
+    plt.axvline(col_median, color = 'green', linestyle = "-", label = 'Median')
+
+    plt.legend()
+    
+    plt.show()
+```
+``` python
+plot_histogram(df, 'tenure')
+```
 
 
 
