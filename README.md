@@ -169,7 +169,29 @@ with open ("encoders.pkl", "wb") as f:
 encoders
 ```
 
+### Training and test data split
 
+``` python
+from sklearn.model_selection import train_test_split, cross_val_score
+```
+
+``` python
+x = df.drop(columns = ['Churn'])
+y = df["Churn"]
+```
+
+```python
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size = 0.2, random_state = 42)
+```
+
+```python
+print(x_train.shape)
+print(y_train.shape)
+```
+
+```python
+print(y_train.value_counts())
+```
 
 
 
