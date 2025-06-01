@@ -193,5 +193,164 @@ print(y_train.shape)
 print(y_train.value_counts())
 ```
 
+### Synthetic Minority Oversampling Technique (SMOTE)
+
+``` python
+from imblearn.over_sampling import SMOTE
+```
+
+```python
+smote = SMOTE(random_state = 42)
+```
+
+```python
+x_train_smote, y_train_smote = smote.fit_resample(x_train, y_train)
+```
+
+```python
+print(y_train_smote.value_counts())
+```
+
+### Model Training
+
+#### Importing the required models
+
+```python
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
+from xgboost import XGBClassifier
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+```
+
+```python
+# dictionary of models
+
+models = {
+    "Decision Tree" : DecisionTreeClassifier(random_state = 42),
+    "Random Forest" : RandomForestClassifier(random_state = 42),
+    "XGBoost" : XGBClassifier(random_state = 42)
+}
+```
+
+```python
+# dictionary to store the cross validation results
+cv_scores = {}
+
+# perform 8 fold cross validation for each model
+
+for model_name, model in models.items():
+    print(f"Training {model_name} with defailt parameters")
+    scores = cross_val_score( model, x_train_smote, y_train_smote, cv = 8, scoring = "accuracy" )
+    cv_scores[model_name] = scores
+    print(f"{model_name} cross-validation accuracy: {np.mean(scores):.3f}")
+```
+
+``` python
+cv_scores
+```
+
+### Model Selection and Hyperparameter Tuning
+
+```python
+from sklearn.model_selection import RandomizedSearchCV
+```
+
+``` python
+#Initializing Models
+
+decision_tree = DecisionTreeClassifier(random_state = 42)
+random_forest = RandomForestClassifier(random_state = 42)
+xg_boost = XGBClassifier(random_state = 42)
+```
+
+```python
+# hyperparameter frid for RandomizedSearchCV
+
+param_grid_dt = {
+    "criterion" : ["gini", "entropy"],
+    "max_depth" : [None, 5, 10, 15, 20, 30, 40, 50, 60, 65, 70, 75],
+    "min_samples_split" : [2, 5, 10],
+    "min_samples_leaf" : [1, 2, 4]
+}
+
+param_grid_rf = {
+    "n_estimators" : [50, 100, 125, 150, 200, 250, 300, 400, 500],
+    "max_depth" : [None, 10, 15, 20, 25, 30, 40, 50],
+    "min_samples_split" : [2, 5, 10],
+    "min_samples_leaf" : [1, 2, 4],
+    "bootstrap" : [True, False]
+}
+
+param_grid_xgb = {
+    "n_estimators" : [50, 100, 150, 200, 250, 300, 400, 500],
+    "max_depth" : [3, 5, 7,10, 12, 15, 20],
+    "learning_rate" : [0.005, 0.01, 0.03, 0.07, 0.1, 0.2],
+    "subsample" : [0.5, 0.7, 1.0, 1.5],
+    "colsample_bytree" : [0.5, 0.7, 1.0, 1.5]
+}
+```
+
+``` python
+# perform RandomSearchCV for each model
+
+random_search_dt = RandomizedSearchCV(estimator = decision_tree, param_distributions = param_grid_dt, n_iter = 20, cv = 5, scoring='accuracy', random_state = 42)
+random_search_rf = RandomizedSearchCV(estimator = random_forest, param_distributions = param_grid_rf, n_iter = 20, cv = 5, scoring='accuracy', random_state = 42)
+random_search_xgb = RandomizedSearchCV(estimator = xg_boost, param_distributions = param_grid_xgb, n_iter = 20, cv = 5, scoring='accuracy', random_state = 42)
+```
+
+```python
+# fit the models
+
+random_search_dt.fit(x_train_smote, y_train_smote)
+random_search_rf.fit(x_train_smote, y_train_smote)
+random_search_xgb.fit(x_train_smote, y_train_smote)
+```
+
+```python
+print(random_search_dt.best_estimator_)
+print(random_search_dt.best_score_)
+```
+
+```python
+# get the model with the best score
+
+best_model = None
+best_score = 0
+
+if random_search_dt.best_score_ > best_score:
+    best_model = random_search_dt.best_estimator_
+    best_score = random_search_dt.best_score_
+
+if random_search_rf.best_score_ > best_score:
+    best_model = random_search_rf.best_estimator_
+    best_score = random_search_rf.best_score_
+
+if random_search_xgb.best_score_ > best_score:
+    best_model = random_search_xgb.best_estimator_
+    best_score = random_search_xgb.best_score_
+
+print(f"Best Model: {best_model}")
+print(f"Best Score: {best_score}")
+```
+
+### Evaluation
+```python
+y_test_pred = best_model.predict(x_test)
+print("Accuracy Score: \n", accuracy_score(y_test, y_test_pred))
+print("Confusion Matrix: \n", confusion_matrix(y_test, y_test_pred))
+print("Classification Report: \n", classification_report(y_test, y_test_pred))
+```
+
+### SAVING THE BEST MODEL
+```python
+#with open("best_model.pkl", "wb") as f:
+    #pickle.dump(best_model, f)
+```
+
+
+
+
+
+
 
 
