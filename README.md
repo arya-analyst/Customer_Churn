@@ -85,5 +85,91 @@ def plot_histogram(df, column_name):
 plot_histogram(df, 'tenure')
 ```
 
+#### Plotting BoxPlots
+
+``` python
+def plot_boxplot(df, column_name):
+    plt.figure(figsize = (5, 5))
+    sns.boxplot( y = df[column_name])
+    plt.title(f"Box Plot for {column_name}")
+    plt.ylabel(column_name)
+    plt.show()
+```
+```python
+plot_boxplot(df, 'MonthlyCharges')
+```
+
+#### Correlation Heatmap
+
+``` python
+plt.figure(figsize = (8, 5))
+sns.heatmap(df[['tenure', 'MonthlyCharges', 'TotalCharges']].corr(), annot =  True, cmap = 'coolwarm', fmt=".2f")  #we are specifying a list in which all the column names have been specified
+plt.title('Correlation Heatmap')
+plt.show()
+```
+
+``` python
+object_cols = df.select_dtypes(include = 'object').columns.to_list()
+object_cols = ['SeniorCitizen'] + object_cols
+
+object_cols
+```
+
+#### Plotting CountPlots
+```python
+for col in object_cols:
+    plt.figure(figsize=(6, 3))
+    ax = sns.countplot(x=df[col])
+    plt.title(f"Count Plot for {col}")
+
+    # Add count numbers on each bar
+    for p in ax.patches:
+        ax.text(
+            p.get_x() + p.get_width() / 2.,  # Horizontal position: center of the bar
+            p.get_height() + 1.0,            # Vertical position: slightly above the bar
+            int(p.get_height()),             # Text: count number
+            ha='center'                      # Horizontal alignment: center
+        )
+
+    plt.show()
+```
+
+### Data Preprocessing
+
+``` python
+df["Churn"] = df["Churn"].replace({"Yes" : 1, "No" : 0})
+```
+
+#### Importing Pickle
+
+``` python
+import pickle
+from sklearn.preprocessing import LabelEncoder
+```
+
+``` python
+# initialize a dictionary to save the encoders
+
+encoders = {}
+
+# apply label encoding and store the encoders
+
+for col in object_cols:
+    label_encoder = LabelEncoder()
+    df[col] = label_encoder.fit_transform(df[col])
+    encoders[col] = label_encoder
+
+
+# save the encoders to a pickle file
+with open ("encoders.pkl", "wb") as f:
+    pickle.dump(encoders, f)
+```
+
+``` python
+encoders
+```
+
+
+
 
 
